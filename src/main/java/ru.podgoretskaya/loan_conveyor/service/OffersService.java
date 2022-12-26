@@ -106,17 +106,7 @@ public class OffersService {
         } else throw new IllegalArgumentException("неверный emal");
         return emailAnswer;
     }
-
-    public List<LoanOfferDTO> LoanOptions(LoanApplicationRequestDTO model) {
-        List<LoanOfferDTO> loanOfferDTO = new ArrayList<>();
-        loanOfferDTO.add(qwerty(false, false, model));
-        loanOfferDTO.add(qwerty(false, true, model));
-        loanOfferDTO.add(qwerty(true, false, model));
-        loanOfferDTO.add(qwerty(true, true, model));
-        return loanOfferDTO;
-    }
-
-    private LoanOfferDTO qwerty(Boolean isInsuranceEnabled, Boolean isSalaryClient, LoanApplicationRequestDTO model) {
+    private LoanOfferDTO possibleTermsOfTheLoan(Boolean isInsuranceEnabled, Boolean isSalaryClient, LoanApplicationRequestDTO model) {
         Long applicationId = Long.valueOf(1);//id в бд
         BigDecimal requestedAmount = model.getAmount();//сумма кредита
         Integer term = model.getTerm();//срок кредита
@@ -146,4 +136,14 @@ public class OffersService {
 
         return new LoanOfferDTO(applicationId, requestedAmount, totalAmount, term, monthlyPayment, rate, isInsuranceEnabled, isSalaryClient);
     }
+    public List<LoanOfferDTO> LoanOptions(LoanApplicationRequestDTO model) {
+        List<LoanOfferDTO> loanOfferDTO = new ArrayList<>();
+        loanOfferDTO.add(possibleTermsOfTheLoan(false, false, model));
+        loanOfferDTO.add(possibleTermsOfTheLoan(false, true, model));
+        loanOfferDTO.add(possibleTermsOfTheLoan(true, false, model));
+        loanOfferDTO.add(possibleTermsOfTheLoan(true, true, model));
+        return loanOfferDTO;
+    }
+
+
 }

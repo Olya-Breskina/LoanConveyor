@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ru.podgoretskaya.loan_conveyor.dto.EmploymentDTO.EmploymentStatus.*;
+import static ru.podgoretskaya.loan_conveyor.dto.EmploymentDTO.Position.*;
 import static ru.podgoretskaya.loan_conveyor.dto.ScoringDataDTO.Gender.*;
 import static ru.podgoretskaya.loan_conveyor.dto.ScoringDataDTO.MaritalStatus.*;
 
@@ -108,6 +109,19 @@ public class CalculationService {
         } else if (BUSINESS_OWNER.equals(model.getEmployment())) {
             rape = rape + 3;
         }
+        //Позиция на работе: Менеджер среднего звена → ставка уменьшается на 2;
+        // Топ-менеджер → ставка уменьшается на 4
+        // владелец ставка-6
+
+        if (WORKER.equals(model.getEmployment())) {
+            rape = rape;
+        } else if (MID_MANAGER.equals(model.getEmployment())) {
+            rape = rape - 2;
+        } else if (TOP_MANAGER.equals(model.getEmployment())) {
+            rape = rape - 4;
+        } else if (OWNER.equals(model.getEmployment())) {
+            rape = rape - 6;
+        }
         //Семейное положение: Замужем/женат → ставка уменьшается на 3;
         // Разведен → ставка увеличивается на 1
         // одинок = ставка
@@ -139,8 +153,15 @@ public class CalculationService {
         } else if (NOT_BINARY.equals(model.getGender())) {
             rape = rape + 3;
         }
-//Сумма займа больше, чем 20 зарплат → отказ
-//model.getEmployment().getWorkExperienceTotal()
+        //Сумма займа больше, чем 20 зарплат → отказ
+        BigDecimal twentySalaries = model.getEmployment().getSalary().multiply(BigDecimal.valueOf(20));
+        if (twentySalaries.compareTo(model.getAmount()) < 0) {
+            throw new IllegalArgumentException("отказ");
+        }
+        //Стаж работы: Общий стаж менее 12 месяцев → отказ; Текущий стаж менее 3 месяцев → отказ
+        if ((model.getEmployment().getWorkExperienceCurrent()<3)&&((model.getEmployment().getWorkExperienceTotal()<12))){
+            throw new IllegalArgumentException("отказ");
+        }
         return rape;
     }
 }
