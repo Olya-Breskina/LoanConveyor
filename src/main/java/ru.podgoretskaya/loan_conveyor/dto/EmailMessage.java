@@ -2,7 +2,6 @@ package ru.podgoretskaya.loan_conveyor.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-
 @Getter
 @Setter
 public class EmailMessage {
