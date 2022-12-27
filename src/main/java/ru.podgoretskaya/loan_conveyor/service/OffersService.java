@@ -1,5 +1,6 @@
 package ru.podgoretskaya.loan_conveyor.service;
 
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
@@ -106,6 +107,7 @@ public class OffersService {
         } else throw new IllegalArgumentException("неверный emal");
         return emailAnswer;
     }
+
     private LoanOfferDTO possibleTermsOfTheLoan(Boolean isInsuranceEnabled, Boolean isSalaryClient, LoanApplicationRequestDTO model) {
         Long applicationId = Long.valueOf(1);//id в бд
         BigDecimal requestedAmount = model.getAmount();//сумма кредита
@@ -123,19 +125,17 @@ public class OffersService {
         } else {
             rate = BigDecimal.valueOf(initialRate - enabled - salaryClient);// ставка
         }
-
-        BigDecimal monthRate = rate.divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_UP);// месячный %
-        BigDecimal exponentiation = BigDecimal.valueOf(1).add(monthRate);
-        for (int i = 1; i < term; i++) {
-            exponentiation = exponentiation.multiply(exponentiation);
-        }
-        BigDecimal numerator = requestedAmount.multiply(monthRate.multiply(exponentiation));
-        BigDecimal denominator = exponentiation.subtract(BigDecimal.valueOf(1));
+        BigDecimal monthRate = rate.divide(BigDecimal.valueOf(1200), 5, RoundingMode.HALF_UP);// месячный %
+        BigDecimal exponentiation = (BigDecimal.valueOf(1).add(monthRate));//(1+monthRate)
+        BigDecimal degree = exponentiation.pow(term);
+        BigDecimal numerator = requestedAmount.multiply(monthRate.multiply(degree));
+        BigDecimal denominator = degree.subtract(BigDecimal.valueOf(1));
         monthlyPayment = numerator.divide(denominator, 2, RoundingMode.HALF_UP); //ежемесячный платеж
         totalAmount = BigDecimal.valueOf(term).multiply(monthlyPayment);//итоговый платеж
 
         return new LoanOfferDTO(applicationId, requestedAmount, totalAmount, term, monthlyPayment, rate, isInsuranceEnabled, isSalaryClient);
     }
+
     public List<LoanOfferDTO> LoanOptions(LoanApplicationRequestDTO model) {
         List<LoanOfferDTO> loanOfferDTO = new ArrayList<>();
         loanOfferDTO.add(possibleTermsOfTheLoan(false, false, model));
