@@ -108,33 +108,33 @@ public class CalculationService {
 
     public int Rate(ScoringDataDTO model) {
 
-        //Рабочий статус: Безработный → отказ;
-        // Самозанятый → ставка увеличивается на 1;
-        //работает =ставка
-        // Владелец бизнеса → ставка увеличивается на 3
+        /*Рабочий статус: Безработный → отказ;
+        Самозанятый → ставка увеличивается на 1;
+        работает =ставка
+         Владелец бизнеса → ставка увеличивается на 3*/
 
-        switch (model.getEmployment().getEmploymentStatus()){
+       /* switch (model.getEmployment().getEmploymentStatus()){
             case UNEMPLOYED:throw new IllegalArgumentException("отказ");
             case SELF_EMPLOYED: rate = rate + 1;break;
             case EMPLOYED: rate = rate;break;
             case BUSINESS_OWNER:rate = rate + 3;break;
             default:throw new IllegalArgumentException("укажите рабочий статус");
-        }
-        //Позиция на работе: Менеджер среднего звена → ставка уменьшается на 2;
-        // Топ-менеджер → ставка уменьшается на 4
-        // владелец ставка-6
+        }*/
+        /*Позиция на работе: Менеджер среднего звена → ставка уменьшается на 2;
+        Топ-менеджер → ставка уменьшается на 4
+        владелец ставка-6*/
 
-        switch (model.getEmployment().getPosition()){
+      /*  switch (model.getEmployment().getPosition()){
             case WORKER:rate = rate; break;
             case MID_MANAGER:rate = rate-2; break;
             case TOP_MANAGER:rate = rate-4; break;
             case OWNER:rate = rate-6; break;
             default:throw new IllegalArgumentException("укажите должность");
-        }
-        //Семейное положение: Замужем/женат → ставка уменьшается на 3;
-        // Разведен → ставка увеличивается на 1
-        // одинок = ставка
-        //вдова =ставка
+        }*/
+        /*Семейное положение: Замужем/женат → ставка уменьшается на 3;
+        Разведен → ставка увеличивается на 1
+        одинок = ставка
+        вдова =ставка*/
         if (MARRIED.equals(model.getMaritalStatus())) {
             rate = rate - 3;
         } else if (DIVORCED.equals(model.getMaritalStatus())) {
@@ -144,10 +144,10 @@ public class CalculationService {
         } else if (WIDOW_WIDOWER.equals(model.getMaritalStatus())) {
             rate = rate;
         }
-        // Возраст менее 20 или более 60 лет → отказ
-        //Пол: Женщина, возраст от 35 до 60 лет → ставка уменьшается на 3; 20-35 ставка +1 
-        // Мужчина, возраст от 30 до 55 лет → ставка  уменьшается на 3; 20-30 или 55-60 ставка+1
-        //Не бинарный → ставка увеличивается на 3
+        /*Возраст менее 20 или более 60 лет → отказ
+        Пол: Женщина, возраст от 35 до 60 лет → ставка уменьшается на 3; 20-35 ставка +1
+        Мужчина, возраст от 30 до 55 лет → ставка  уменьшается на 3; 20-30 или 55-60 ставка+1
+        Не бинарный → ставка увеличивается на 3*/
         if ((age < 20) || (age > 60)) {
             throw new IllegalArgumentException("отказ");
         }
@@ -216,20 +216,22 @@ public class CalculationService {
         psk = numerator.divide(termInYears).multiply(BigDecimal.valueOf(100));
         return psk;
     }
-  public List<PaymentScheduleElement> PaymentScheduleElement(ScoringDataDTO model){
+
+    public List<PaymentScheduleElement> PaymentScheduleElement(ScoringDataDTO model) {
         List<PaymentScheduleElement> paymentScheduleElement = new ArrayList<>();
-      Integer number=1;
-      LocalDate date=LocalDate.now();//дата
-      BigDecimal totalPayment=monthlyPayment;//всего к оплате
-      BigDecimal interestPayment;//выплата %
-      BigDecimal debtPayment;//выплата долга
-      BigDecimal remainingDebt=model.getAmount();//остаток
-        for ( number=1;  number<=model.getTerm(); number++){
-            date=date.plusMonths(1);
-            interestPayment=remainingDebt.multiply(BigDecimal.valueOf(rate).divide(BigDecimal.valueOf(1200), 2, RoundingMode.HALF_UP));
-            debtPayment=totalPayment.subtract(interestPayment).divide(BigDecimal.valueOf(1), 2, RoundingMode.HALF_UP);
-            remainingDebt=remainingDebt.subtract(debtPayment).divide(BigDecimal.valueOf(1), 2, RoundingMode.HALF_UP);
-            paymentScheduleElement.add(new PaymentScheduleElement(number, date,totalPayment,interestPayment,debtPayment,remainingDebt));
+        Integer number = 1;
+        LocalDate date = LocalDate.now();//дата
+        BigDecimal totalPayment = monthlyPayment;//всего к оплате
+        BigDecimal interestPayment;//выплата %
+        BigDecimal debtPayment;//выплата долга
+        BigDecimal remainingDebt = model.getAmount();//остаток
+        for (number = 1; number <= model.getTerm(); number++) {
+            date = date.plusMonths(1);
+
+            interestPayment = remainingDebt.multiply(BigDecimal.valueOf(rate).divide(BigDecimal.valueOf(1200), 2, RoundingMode.HALF_UP));
+            debtPayment = totalPayment.subtract(interestPayment).divide(BigDecimal.valueOf(1), 2, RoundingMode.HALF_UP);
+            remainingDebt = remainingDebt.subtract(debtPayment).divide(BigDecimal.valueOf(1), 2, RoundingMode.HALF_UP);
+            paymentScheduleElement.add(new PaymentScheduleElement(number, date, totalPayment, interestPayment, debtPayment, remainingDebt));
         }
         return paymentScheduleElement;
     }

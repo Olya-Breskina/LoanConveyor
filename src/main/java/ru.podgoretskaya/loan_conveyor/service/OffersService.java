@@ -1,6 +1,6 @@
 package ru.podgoretskaya.loan_conveyor.service;
 
-import lombok.ToString;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
@@ -25,14 +25,8 @@ public class OffersService {
     @Value("${amountMin}")
     private BigDecimal amountMin;
 
-    boolean firstLastMiddleNameAnswer;
-    boolean amountAnswer;
-    boolean termAnswer;
-    boolean birthdateAnswer;
-    boolean passportAnswer;
-    boolean emailAnswer;
-
     public boolean FirstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
+        boolean firstLastMiddleNameAnswer;
         Pattern patlatletter = Pattern.compile("^[a-zA-Z]+$");
         int lengthFirstName = model.getFirstName().length();
         Matcher firstNameLatLetter = patlatletter.matcher(model.getFirstName());
@@ -46,8 +40,8 @@ public class OffersService {
             if ((lengthFirstName >= 2) && (lengthFirstName <= 30)
                     && (lengthLastName >= 2) && (lengthLastName <= 30)
                     && (lengthMiddleName >= 2) && (lengthMiddleName <= 30)
-                    && (firstNameLatLetter.matches() == true)
-                    && (lastNameLatLetter.matches() == true)
+                    && (firstNameLatLetter.matches())
+                    && (lastNameLatLetter.matches())
                     && (middleNameLatLetter.matches())
             ) {
                 firstLastMiddleNameAnswer = true;
@@ -56,8 +50,8 @@ public class OffersService {
 
             if ((lengthFirstName >= 2) && (lengthFirstName <= 30)
                     && (lengthLastName >= 2) && (lengthLastName <= 30)
-                    && (firstNameLatLetter.matches() == true)
-                    && (lastNameLatLetter.matches() == true)
+                    && (firstNameLatLetter.matches())
+                    && (lastNameLatLetter.matches())
             ) {
                 firstLastMiddleNameAnswer = true;
             } else throw new IllegalArgumentException("проверьте ФИО");
@@ -66,6 +60,7 @@ public class OffersService {
     }
 
     public boolean AmountOffers(LoanApplicationRequestDTO model) {
+        boolean amountAnswer;
         int compare = model.getAmount().compareTo(amountMin);
         if (compare >= 0) {
             amountAnswer = true;
@@ -74,6 +69,7 @@ public class OffersService {
     }
 
     public boolean TermOffers(LoanApplicationRequestDTO model) {
+        boolean termAnswer;
         if (model.getTerm() >= 6) {
             termAnswer = true;
         } else throw new IllegalArgumentException("увеличите срок кредита");
@@ -81,6 +77,7 @@ public class OffersService {
     }
 
     public boolean BirthdateOffers(LoanApplicationRequestDTO model) {
+        boolean birthdateAnswer;
         LocalDate date = LocalDate.now();
         int age = date.compareTo(model.getBirthdate());
         if (age >= 18) {
@@ -90,6 +87,7 @@ public class OffersService {
     }
 
     public boolean PassportOffers(LoanApplicationRequestDTO model) {
+        boolean passportAnswer;
         int lengthPassportSeries = model.getPassportSeries().length();
         int lengthPassportNumber = model.getPassportNumber().length();
         if ((lengthPassportSeries == 4) && (lengthPassportNumber == 6)) {
@@ -98,7 +96,9 @@ public class OffersService {
         return passportAnswer;
     }
 
+
     public boolean EmailOffers(LoanApplicationRequestDTO model) {
+        boolean emailAnswer;
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern patEmail = Pattern.compile(regex);
         Matcher emailOffers = patEmail.matcher(model.getEmail());
@@ -117,13 +117,12 @@ public class OffersService {
         BigDecimal totalAmount;
         if (!isInsuranceEnabled && !isSalaryClient) {
             rate = BigDecimal.valueOf(initialRate + enabled + salaryClient);// ставка
-
         } else if ((!isInsuranceEnabled) && (isSalaryClient)) {
-            rate = BigDecimal.valueOf(initialRate + enabled - salaryClient);// ставка
+            rate = BigDecimal.valueOf(initialRate + enabled - salaryClient);
         } else if ((isInsuranceEnabled) && (!isSalaryClient)) {
-            rate = BigDecimal.valueOf(initialRate - enabled + salaryClient);// ставка
+            rate = BigDecimal.valueOf(initialRate - enabled + salaryClient);
         } else {
-            rate = BigDecimal.valueOf(initialRate - enabled - salaryClient);// ставка
+            rate = BigDecimal.valueOf(initialRate - enabled - salaryClient);
         }
         BigDecimal monthRate = rate.divide(BigDecimal.valueOf(1200), 5, RoundingMode.HALF_UP);// месячный %
         BigDecimal exponentiation = (BigDecimal.valueOf(1).add(monthRate));//(1+monthRate)
