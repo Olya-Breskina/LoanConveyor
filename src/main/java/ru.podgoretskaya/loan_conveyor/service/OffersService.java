@@ -25,7 +25,7 @@ public class OffersService {
     @Value("${amountMin}")
     private BigDecimal amountMin;
 
-    public boolean FirstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
+    public boolean firstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
         boolean firstLastMiddleNameAnswer;
         Pattern patlatletter = Pattern.compile("^[a-zA-Z]+$");
         int lengthFirstName = model.getFirstName().length();
@@ -59,7 +59,7 @@ public class OffersService {
         return firstLastMiddleNameAnswer;
     }
 
-    public boolean AmountOffers(LoanApplicationRequestDTO model) {
+    public boolean amountOffers(LoanApplicationRequestDTO model) {
         boolean amountAnswer;
         int compare = model.getAmount().compareTo(amountMin);
         if (compare >= 0) {
@@ -68,7 +68,7 @@ public class OffersService {
         return amountAnswer;
     }
 
-    public boolean TermOffers(LoanApplicationRequestDTO model) {
+    public boolean termOffers(LoanApplicationRequestDTO model) {
         boolean termAnswer;
         if (model.getTerm() >= 6) {
             termAnswer = true;
@@ -76,7 +76,7 @@ public class OffersService {
         return termAnswer;
     }
 
-    public boolean BirthdateOffers(LoanApplicationRequestDTO model) {
+    public boolean birthdateOffers(LoanApplicationRequestDTO model) {
         boolean birthdateAnswer;
         LocalDate date = LocalDate.now();
         int age = date.compareTo(model.getBirthdate());
@@ -86,7 +86,7 @@ public class OffersService {
         return birthdateAnswer;
     }
 
-    public boolean PassportOffers(LoanApplicationRequestDTO model) {
+    public boolean passportOffers(LoanApplicationRequestDTO model) {
         boolean passportAnswer;
         int lengthPassportSeries = model.getPassportSeries().length();
         int lengthPassportNumber = model.getPassportNumber().length();
@@ -96,8 +96,7 @@ public class OffersService {
         return passportAnswer;
     }
 
-
-    public boolean EmailOffers(LoanApplicationRequestDTO model) {
+    public boolean emailOffers(LoanApplicationRequestDTO model) {
         boolean emailAnswer;
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern patEmail = Pattern.compile(regex);
@@ -115,6 +114,8 @@ public class OffersService {
         BigDecimal rate;
         BigDecimal monthlyPayment;
         BigDecimal totalAmount;
+        BigDecimal monthsOfTheYear = BigDecimal.valueOf(12);
+        BigDecimal percent = BigDecimal.valueOf(100);
         if (!isInsuranceEnabled && !isSalaryClient) {
             rate = BigDecimal.valueOf(initialRate + enabled + salaryClient);// ставка
         } else if ((!isInsuranceEnabled) && (isSalaryClient)) {
@@ -124,25 +125,29 @@ public class OffersService {
         } else {
             rate = BigDecimal.valueOf(initialRate - enabled - salaryClient);
         }
-        BigDecimal monthRate = rate.divide(BigDecimal.valueOf(1200), 5, RoundingMode.HALF_UP);// месячный %
-        BigDecimal exponentiation = (BigDecimal.valueOf(1).add(monthRate));//(1+monthRate)
+        BigDecimal monthRate = rate.divide(monthsOfTheYear.multiply(percent), 5, RoundingMode.HALF_UP);// месячный %
+        BigDecimal exponentiation = (BigDecimal.ONE.add(monthRate));//(1+monthRate)
         BigDecimal degree = exponentiation.pow(term);
         BigDecimal numerator = requestedAmount.multiply(monthRate.multiply(degree));
-        BigDecimal denominator = degree.subtract(BigDecimal.valueOf(1));
+        BigDecimal denominator = degree.subtract(BigDecimal.ONE);
         monthlyPayment = numerator.divide(denominator, 2, RoundingMode.HALF_UP); //ежемесячный платеж
         totalAmount = BigDecimal.valueOf(term).multiply(monthlyPayment);//итоговый платеж
-
         return new LoanOfferDTO(applicationId, requestedAmount, totalAmount, term, monthlyPayment, rate, isInsuranceEnabled, isSalaryClient);
     }
 
-    public List<LoanOfferDTO> LoanOptions(LoanApplicationRequestDTO model) {
-        List<LoanOfferDTO> loanOfferDTO = new ArrayList<>();
-        loanOfferDTO.add(possibleTermsOfTheLoan(false, false, model));
-        loanOfferDTO.add(possibleTermsOfTheLoan(false, true, model));
-        loanOfferDTO.add(possibleTermsOfTheLoan(true, false, model));
-        loanOfferDTO.add(possibleTermsOfTheLoan(true, true, model));
+    public List<LoanOfferDTO> loanOptions(LoanApplicationRequestDTO model) {
+        List<LoanOfferDTO> loanOfferDTO;
+        if (firstLastMiddleNameOffers(model) && amountOffers(model) && termOffers(model) && birthdateOffers(model) &&
+                passportOffers(model) && emailOffers(model)) {
+            loanOfferDTO = new ArrayList<>();
+            loanOfferDTO.add(possibleTermsOfTheLoan(false, false, model));
+            loanOfferDTO.add(possibleTermsOfTheLoan(false, true, model));
+            loanOfferDTO.add(possibleTermsOfTheLoan(true, false, model));
+            loanOfferDTO.add(possibleTermsOfTheLoan(true, true, model));
+        } else {
+            throw new IllegalArgumentException("проверьте данные паспорта");
+        }
         return loanOfferDTO;
     }
-
 
 }
