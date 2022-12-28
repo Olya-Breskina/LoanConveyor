@@ -1,4 +1,4 @@
-package Podgoretskaya.LoanConveyor;
+package ru.podgoretskaya.loan_conveyor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
