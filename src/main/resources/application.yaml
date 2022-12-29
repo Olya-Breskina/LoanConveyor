@@ -7,3 +7,4 @@ amountMin: 100000
 logging:
   level:
     ru.podgoretskaya: DEBUG
+

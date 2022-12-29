@@ -190,7 +190,7 @@ public class CalculationService {
         return paymentScheduleElement;
     }
 
-   public CreditDTO creditDTO(ScoringDataDTO model) {
+    public CreditDTO creditDTO(ScoringDataDTO model) {
         BigDecimal amount = model.getAmount();
         Integer term = model.getTerm();
         BigDecimal rate = rate(model);
@@ -199,6 +199,6 @@ public class CalculationService {
         Boolean isInsuranceEnabled = model.getIsInsuranceEnabled();
         Boolean isSalaryClient = model.getIsSalaryClient();
         List<PaymentScheduleElement> paymentSchedule = paymentScheduleElement(model, rate);
-        return creditDTO(model);
+        return new CreditDTO(amount,term,rate,monthlyPayment,psk,isInsuranceEnabled,isSalaryClient,paymentSchedule);
     }
 }
