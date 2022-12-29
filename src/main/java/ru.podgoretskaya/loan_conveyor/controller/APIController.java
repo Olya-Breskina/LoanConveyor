@@ -1,21 +1,29 @@
 package ru.podgoretskaya.loan_conveyor.controller;
 
-import lombok.ToString;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.podgoretskaya.loan_conveyor.dto.EmploymentDTO;
+import org.springframework.web.bind.annotation.RestController;
+import ru.podgoretskaya.loan_conveyor.dto.CreditDTO;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
+import ru.podgoretskaya.loan_conveyor.dto.LoanOfferDTO;
 import ru.podgoretskaya.loan_conveyor.dto.ScoringDataDTO;
 import ru.podgoretskaya.loan_conveyor.service.CalculationService;
 import ru.podgoretskaya.loan_conveyor.service.OffersService;
 
-@Controller
+import java.util.List;
 
+@Controller
+@RestController
+@Slf4j
 @SuppressWarnings("unused")
+@Tag(name = "Реализация кредитного конвейера", description = "Методы для реализации прескоринга и скоринга")
 public class APIController {
     LoanApplicationRequestDTO operationOffersModel = new LoanApplicationRequestDTO();
     ScoringDataDTO operationCalculationModel = new ScoringDataDTO();
@@ -29,38 +37,26 @@ public class APIController {
     }
 
     @PostMapping(value = "/conveyor/offers")
-    public ResponseEntity<String> getOffersPages(@RequestBody LoanApplicationRequestDTO model) {
+    @Operation(summary = "прескоринг")
+    public ResponseEntity<List<LoanOfferDTO>> getOffersPages(@RequestBody LoanApplicationRequestDTO model) {
+        log.info("вызов /conveyor/offers");
         try {
-            return new ResponseEntity(
-                    offersService.FirstLastMiddleNameOffers(model) + ", " +
-                            offersService.BirthdateOffers(model) + ", " +
-                            offersService.PassportOffers(model) + ", " +
-                            offersService.EmailOffers(model) + ", " +
-                            offersService.EmailOffers(model) + ", " +
-                            offersService.AmountOffers(model) + ", " +
-                            offersService.TermOffers(model) + ", \n" +
-                            offersService.LoanOptions(model), HttpStatus.OK);
+            return new ResponseEntity<>(offersService.loanOptions(model), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity("ошибка заполнения формы", HttpStatus.BAD_GATEWAY);
+            log.info("ошибка заполнения формы");
+            return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
         }
     }
 
     @PostMapping(value = "/conveyor/calculation")
-    public ResponseEntity<String> getOffersPages(@RequestBody ScoringDataDTO model) {
+    @Operation(summary = "скоринг")
+    public ResponseEntity<CreditDTO> getOffersPages(@RequestBody ScoringDataDTO model) {
+        log.info("вызов /conveyor/calculation");
         try {
-            return new ResponseEntity(
-                    "firstName=" + calculationService.FirstLastMiddleNameCalculation(model)
-                            + ", " + "birthdate=" + calculationService.BirthdateCalculation(model)
-                            + ", " + "passportNumber=" + calculationService.PassportCalculation(model)
-                            + ", " + "amount=" + calculationService.AmountCalculation(model)
-                            + ", " + "term=" + calculationService.TermCalculation(model)
-                            + ", " + "rate=" + calculationService.Rate(model)
-                            + ", " + "MonthlyPaymentAmount= " + calculationService.MonthlyPaymentAmount(model)
-                            + ", " + "PSK= " + calculationService.Psk(model)
-                            + ", \n" + calculationService.PaymentScheduleElement(model)
-                    , HttpStatus.OK);
+            return new ResponseEntity(calculationService.creditDTO(model), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity("ошибка заполнения формы", HttpStatus.BAD_GATEWAY);
+            log.info("ошибка заполнения формы");
+            return new ResponseEntity(HttpStatus.BAD_GATEWAY);
         }
     }
 }
