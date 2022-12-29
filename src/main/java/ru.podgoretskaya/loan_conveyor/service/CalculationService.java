@@ -3,6 +3,7 @@ package ru.podgoretskaya.loan_conveyor.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.podgoretskaya.loan_conveyor.dto.CreditDTO;
 import ru.podgoretskaya.loan_conveyor.dto.PaymentScheduleElement;
 import ru.podgoretskaya.loan_conveyor.dto.ScoringDataDTO;
 
@@ -27,42 +28,66 @@ public class CalculationService {
     BigDecimal psk;// полной стоимости кредита
     BigDecimal monthsOfTheYear = BigDecimal.valueOf(12);
     BigDecimal percent = BigDecimal.valueOf(100);
+
     public BigDecimal rate(ScoringDataDTO model) {
-        BigDecimal rate=initiRate;
+        log.info("вход в метод rate ");
+        BigDecimal rate = initiRate;
         /*Рабочий статус: Безработный → отказ;
         Самозанятый → ставка увеличивается на 1;
         работает =ставка
          Владелец бизнеса → ставка увеличивается на 3*/
-        log.debug("Рабочий статус "+model.getEmployment().getEmploymentStatus());
-        switch (model.getEmployment().getEmploymentStatus()){
-            case UNEMPLOYED:throw new IllegalArgumentException("отказ");
-            case SELF_EMPLOYED: rate = rate.add(BigDecimal.valueOf(1));break;
-            case EMPLOYED:  break;
-            case BUSINESS_OWNER:rate = rate.add(BigDecimal.valueOf(3));break;
-            default:throw new IllegalArgumentException("укажите рабочий статус");
+        log.debug("Рабочий статус " + model.getEmployment().getEmploymentStatus());
+        switch (model.getEmployment().getEmploymentStatus()) {
+            case UNEMPLOYED:
+                throw new IllegalArgumentException("отказ");
+            case SELF_EMPLOYED:
+                rate = rate.add(BigDecimal.valueOf(1));
+                break;
+            case EMPLOYED:
+                break;
+            case BUSINESS_OWNER:
+                rate = rate.add(BigDecimal.valueOf(3));
+                break;
+            default:
+                throw new IllegalArgumentException("укажите рабочий статус");
         }
         /*Позиция на работе: Менеджер среднего звена → ставка уменьшается на 2;
         Топ-менеджер → ставка уменьшается на 4
         владелец ставка-6*/
-        log.debug("Позиция на работе "+model.getEmployment().getPosition());
-       switch (model.getEmployment().getPosition()){
-            case WORKER: break;
-            case MID_MANAGER:rate = rate.subtract(BigDecimal.valueOf(2)); break;
-            case TOP_MANAGER:rate = rate.subtract(BigDecimal.valueOf(4)); break;
-            case OWNER:rate = rate.subtract(BigDecimal.valueOf(6)); break;
-            default:throw new IllegalArgumentException("укажите должность");
+        log.debug("Позиция на работе " + model.getEmployment().getPosition());
+        switch (model.getEmployment().getPosition()) {
+            case WORKER:
+                break;
+            case MID_MANAGER:
+                rate = rate.subtract(BigDecimal.valueOf(2));
+                break;
+            case TOP_MANAGER:
+                rate = rate.subtract(BigDecimal.valueOf(4));
+                break;
+            case OWNER:
+                rate = rate.subtract(BigDecimal.valueOf(6));
+                break;
+            default:
+                throw new IllegalArgumentException("укажите должность");
         }
         /*Семейное положение: Замужем/женат → ставка уменьшается на 3;
         Разведен → ставка увеличивается на 1
         одинок = ставка
         вдова =ставка*/
-        log.debug("Семейное положение "+model.getMaritalStatus());
-        switch (model.getMaritalStatus()){
-            case MARRIED:rate = rate.subtract(BigDecimal.valueOf(3));break;
-            case DIVORCED: rate = rate.add(BigDecimal.valueOf(1));break;
-            case SINGLE:break;
-            case WIDOW_WIDOWER:break;
-            default:throw new IllegalArgumentException("укажите семейный статус");
+        log.debug("Семейное положение " + model.getMaritalStatus());
+        switch (model.getMaritalStatus()) {
+            case MARRIED:
+                rate = rate.subtract(BigDecimal.valueOf(3));
+                break;
+            case DIVORCED:
+                rate = rate.add(BigDecimal.valueOf(1));
+                break;
+            case SINGLE:
+                break;
+            case WIDOW_WIDOWER:
+                break;
+            default:
+                throw new IllegalArgumentException("укажите семейный статус");
         }
 
         /*Возраст менее 20 или более 60 лет → отказ
@@ -71,7 +96,7 @@ public class CalculationService {
         Не бинарный → ставка увеличивается на 3*/
         LocalDate date = LocalDate.now();
         int age = date.compareTo(model.getBirthdate());
-        log.debug ("возрат "+age);
+        log.debug("возрат " + age);
         if ((age < 20) || (age > 60)) {
             throw new IllegalArgumentException("отказ");
         }
@@ -99,21 +124,22 @@ public class CalculationService {
             rate = rate.add(BigDecimal.valueOf(3));
         }
         //Сумма займа больше, чем 20 зарплат → отказ
-        log.debug("Сумма займа "+model.getAmount());
-       BigDecimal twentySalaries = model.getEmployment().getSalary().multiply(BigDecimal.valueOf(20));
+        log.debug("Сумма займа " + model.getAmount());
+        BigDecimal twentySalaries = model.getEmployment().getSalary().multiply(BigDecimal.valueOf(20));
         if (twentySalaries.compareTo(model.getAmount()) < 0) {
             throw new IllegalArgumentException("отказ");
         }
         //Стаж работы: Общий стаж менее 12 месяцев → отказ; Текущий стаж менее 3 месяцев → отказ
-        log.debug("Стаж работы " +model.getEmployment().getWorkExperienceCurrent()+", "+ model.getEmployment().getWorkExperienceTotal());
-        if ((model.getEmployment().getWorkExperienceCurrent()<3)&&((model.getEmployment().getWorkExperienceTotal()<12))){
+        log.debug("Стаж работы " + model.getEmployment().getWorkExperienceCurrent() + ", " + model.getEmployment().getWorkExperienceTotal());
+        if ((model.getEmployment().getWorkExperienceCurrent() < 3) && ((model.getEmployment().getWorkExperienceTotal() < 12))) {
             throw new IllegalArgumentException("отказ");
         }
-        log.info("ставка "+rate);
+        log.info("ставка " + rate);
         return rate;
     }
 
-    public BigDecimal monthlyPaymentAmount(ScoringDataDTO model, BigDecimal rate ) {
+    public BigDecimal monthlyPaymentAmount(ScoringDataDTO model, BigDecimal rate) {
+        log.info("вход в метод monthlyPaymentAmount");
         BigDecimal requestedAmount = model.getAmount();//сумма кредита
         Integer term = model.getTerm();//срок кредита
         BigDecimal monthRate = rate.divide(monthsOfTheYear.multiply(percent), 2, RoundingMode.HALF_UP);// месячный %
@@ -122,11 +148,12 @@ public class CalculationService {
         BigDecimal numerator = requestedAmount.multiply(monthRate.multiply(degree));
         BigDecimal denominator = degree.subtract(BigDecimal.ONE);
         monthlyPayment = numerator.divide(denominator, 2, RoundingMode.HALF_UP); //ежемесячный платеж
-        log.info("размер ежемесячного платежа "+monthlyPayment);
+        log.info("размер ежемесячного платежа " + monthlyPayment);
         return monthlyPayment;
     }
 
     public BigDecimal psk(ScoringDataDTO model) {
+        log.info("вход в метод psk");
         BigDecimal requestedAmount = model.getAmount();
         Integer term = model.getTerm();
         boolean isInsuranceEnabled = model.getIsInsuranceEnabled();
@@ -136,16 +163,16 @@ public class CalculationService {
         } else {
             totalAmountOfAllPayments = monthlyPayment.multiply(BigDecimal.valueOf(term));
         }
-
         BigDecimal numerator = totalAmountOfAllPayments.divide(requestedAmount, 2, RoundingMode.HALF_UP)
                 .subtract(BigDecimal.valueOf(1));
         BigDecimal termInYears = BigDecimal.valueOf(term).divide(BigDecimal.valueOf(12));//срок кредита в годах
         psk = numerator.divide(termInYears).multiply(BigDecimal.valueOf(100));
-        log.info("пск "+psk);
+        log.info("пск " + psk);
         return psk;
     }
 
     public List<PaymentScheduleElement> paymentScheduleElement(ScoringDataDTO model, BigDecimal rate) {
+        log.info("вход в метод paymentScheduleElement");
         List<PaymentScheduleElement> paymentScheduleElement = new ArrayList<>();
         Integer number = 1;
         LocalDate date = LocalDate.now();//дата
@@ -161,5 +188,17 @@ public class CalculationService {
             paymentScheduleElement.add(new PaymentScheduleElement(number, date, totalPayment, interestPayment, debtPayment, remainingDebt));
         }
         return paymentScheduleElement;
+    }
+
+   public CreditDTO creditDTO(ScoringDataDTO model) {
+        BigDecimal amount = model.getAmount();
+        Integer term = model.getTerm();
+        BigDecimal rate = rate(model);
+        BigDecimal monthlyPayment = monthlyPaymentAmount(model, rate);
+        BigDecimal psk = psk(model);
+        Boolean isInsuranceEnabled = model.getIsInsuranceEnabled();
+        Boolean isSalaryClient = model.getIsSalaryClient();
+        List<PaymentScheduleElement> paymentSchedule = paymentScheduleElement(model, rate);
+        return creditDTO(model);
     }
 }

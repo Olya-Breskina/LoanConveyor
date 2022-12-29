@@ -1,6 +1,7 @@
 package ru.podgoretskaya.loan_conveyor.service;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Service
 public class OffersService {
     @Value("${initialRate}")
@@ -26,14 +28,18 @@ public class OffersService {
     private BigDecimal amountMin;
 
     public boolean firstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
+        log.info("проверка ФИО");
         boolean firstLastMiddleNameAnswer;
         Pattern patlatletter = Pattern.compile("^[a-zA-Z]+$");
+        log.debug("имя " + model.getFirstName());
         int lengthFirstName = model.getFirstName().length();
         Matcher firstNameLatLetter = patlatletter.matcher(model.getFirstName());
+        log.debug("фамилия " + model.getLastName());
         int lengthLastName = model.getLastName().length();
         Matcher lastNameLatLetter = patlatletter.matcher(model.getLastName());
         int lengthMiddleName;
         Matcher middleNameLatLetter;
+        log.debug("отчество " + model.getMiddleName());
         if (model.getMiddleName() != null) {
             lengthMiddleName = model.getMiddleName().length();
             middleNameLatLetter = patlatletter.matcher(model.getMiddleName());
@@ -54,56 +60,78 @@ public class OffersService {
                     && (lastNameLatLetter.matches())
             ) {
                 firstLastMiddleNameAnswer = true;
-            } else throw new IllegalArgumentException("проверьте ФИО");
+            } else {log.info("проверьте ФИО");
+                throw new IllegalArgumentException("проверьте ФИО");
+            }
+
         }
         return firstLastMiddleNameAnswer;
     }
 
     public boolean amountOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод amountOffers");
         boolean amountAnswer;
+        log.debug("запрошенная сумма "+model.getAmount());
         int compare = model.getAmount().compareTo(amountMin);
         if (compare >= 0) {
             amountAnswer = true;
-        } else throw new IllegalArgumentException("увеличите сумму кредита");
+        } else {log.info("увеличите сумму кредита");
+            throw new IllegalArgumentException("увеличите сумму кредита");}
         return amountAnswer;
     }
 
     public boolean termOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод termOffers");
         boolean termAnswer;
+        log.debug("срок кредита "+model.getTerm());
         if (model.getTerm() >= 6) {
             termAnswer = true;
-        } else throw new IllegalArgumentException("увеличите срок кредита");
+        } else {log.info("увеличите срок кредита");
+            throw new IllegalArgumentException("увеличите срок кредита");
+        }
         return termAnswer;
     }
 
     public boolean birthdateOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод birthdateOffers");
         boolean birthdateAnswer;
         LocalDate date = LocalDate.now();
+        log.debug("дата рождения "+model.getBirthdate());
         int age = date.compareTo(model.getBirthdate());
         if (age >= 18) {
             birthdateAnswer = true;
-        } else throw new IllegalArgumentException("проверьте дату рождения");
+        } else {log.info("проверьте дату рождения");
+            throw new IllegalArgumentException("проверьте дату рождения");
+        }
         return birthdateAnswer;
     }
 
     public boolean passportOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод passportOffers");
         boolean passportAnswer;
+        log.debug("серия номер "+model.getPassportSeries()+", "+ model.getPassportNumber());
         int lengthPassportSeries = model.getPassportSeries().length();
         int lengthPassportNumber = model.getPassportNumber().length();
         if ((lengthPassportSeries == 4) && (lengthPassportNumber == 6)) {
             passportAnswer = true;
-        } else throw new IllegalArgumentException("проверьте данные паспорта");
+        } else {log.info("проверьте данные паспорта");
+            throw new IllegalArgumentException("проверьте данные паспорта");
+        }
         return passportAnswer;
     }
 
     public boolean emailOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод emailOffers");
         boolean emailAnswer;
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern patEmail = Pattern.compile(regex);
+        log.debug("email "+model.getEmail());
         Matcher emailOffers = patEmail.matcher(model.getEmail());
         if (emailOffers.matches() == true) {
             emailAnswer = true;
-        } else throw new IllegalArgumentException("неверный emal");
+        } else {log.info("неверный email");
+            throw new IllegalArgumentException("неверный email");
+        }
         return emailAnswer;
     }
 
@@ -136,6 +164,7 @@ public class OffersService {
     }
 
     public List<LoanOfferDTO> loanOptions(LoanApplicationRequestDTO model) {
+        log.info("вход в метод loanOptions");
         List<LoanOfferDTO> loanOfferDTO;
         if (firstLastMiddleNameOffers(model) && amountOffers(model) && termOffers(model) && birthdateOffers(model) &&
                 passportOffers(model) && emailOffers(model)) {
@@ -144,7 +173,7 @@ public class OffersService {
             loanOfferDTO.add(possibleTermsOfTheLoan(false, true, model));
             loanOfferDTO.add(possibleTermsOfTheLoan(true, false, model));
             loanOfferDTO.add(possibleTermsOfTheLoan(true, true, model));
-        } else {
+        } else {log.info("проверьте введеные данные");
             throw new IllegalArgumentException("проверьте данные паспорта");
         }
         return loanOfferDTO;
