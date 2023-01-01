@@ -82,7 +82,9 @@ public class CalculationService {
             case DIVORCED:
                 rate = rate.add(BigDecimal.valueOf(1));
                 break;
-            case SINGLE, WIDOW_WIDOWER:
+            case SINGLE:
+                break;
+            case WIDOW_WIDOWER:
                 break;
             default:
                 throw new IllegalArgumentException("укажите семейный статус");
