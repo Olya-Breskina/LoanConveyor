@@ -1,17 +1,23 @@
 package ru.podgoretskaya.loan_conveyor.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import ru.podgoretskaya.loan_conveyor.dto.CreditDTO;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
+import ru.podgoretskaya.loan_conveyor.dto.LoanOfferDTO;
 import ru.podgoretskaya.loan_conveyor.dto.ScoringDataDTO;
 import ru.podgoretskaya.loan_conveyor.service.CalculationService;
 import ru.podgoretskaya.loan_conveyor.service.OffersService;
 
+import java.util.List;
+
 @Controller
+@Slf4j
 @SuppressWarnings("unused")
 public class APIController {
     LoanApplicationRequestDTO operationOffersModel = new LoanApplicationRequestDTO();
@@ -26,22 +32,24 @@ public class APIController {
     }
 
     @PostMapping(value = "/conveyor/offers")
-    public ResponseEntity<String> getOffersPages(@RequestBody LoanApplicationRequestDTO model) {
+    public ResponseEntity<List<LoanOfferDTO>> getOffersPages(@RequestBody LoanApplicationRequestDTO model) {
+        log.info("вызов /conveyor/offers. Параметры: \"" + model.toString());
         try {
-            return new ResponseEntity(
-                    "firstName=" + model.getFirstName() + ", " +
-                            "middleName=" + model.getMiddleName() + ", " +
-                            "lastName=" + model.getLastName() + ", " +
-                            "birthdate=" + model.getBirthdate() + ", " +
-                            "passportSeries=" + model.getPassportSeries() + ", " +
-                            "passportNumber=" + model.getPassportNumber() + ", " +
-                            "email=" + model.getEmail() + ", " +
-                            "amount=" + model.getAmount() + ", " +
-                            "term=" + model.getTerm()
-                    , HttpStatus.OK);
+            return new ResponseEntity<>(offersService.loanOptions(model), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.info("ошибка заполнения формы");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        catch (IllegalArgumentException e){
-            return new ResponseEntity("ошибка заполнения формы", HttpStatus.BAD_GATEWAY);
+    }
+
+    @PostMapping(value = "/conveyor/calculation")
+    public ResponseEntity<CreditDTO> getOffersPages(@RequestBody ScoringDataDTO model) {
+        log.info("вызов /conveyor/calculation. Параметры: \"" + model.toString());
+        try {
+            return new ResponseEntity(calculationService.creditDTO(model), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.info("ошибка заполнения формы");
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
     }
 }

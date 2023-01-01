@@ -1,5 +1,9 @@
-creditInsurance: 100000
-initialRate: 10
+creditInsurance: 1000
+initialRate: 20
 enabled: 3
 salaryClient: 1
 amountMin: 100000
+
+logging:
+  level:
+    ru.podgoretskaya: DEBUG

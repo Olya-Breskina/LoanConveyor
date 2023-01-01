@@ -1,17 +1,22 @@
 package ru.podgoretskaya.loan_conveyor.service;
 
+
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
 import ru.podgoretskaya.loan_conveyor.dto.LoanOfferDTO;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Service
 public class OffersService {
     @Value("${initialRate}")
@@ -22,31 +27,28 @@ public class OffersService {
     private int salaryClient;
     @Value("${amountMin}")
     private BigDecimal amountMin;
-    boolean offersAnswer;
-    boolean firstLastMiddleNameAnswer;
-    boolean amountAnswer;
-    boolean termAnswer;
-    boolean birthdateAnswer;
-    boolean passportAnswer;
-    boolean emailAnswer;
 
-    public boolean FirstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
+    public boolean firstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
+        log.info("проверка ФИО");
+        boolean firstLastMiddleNameAnswer;
         Pattern patlatletter = Pattern.compile("^[a-zA-Z]+$");
+        log.debug("имя " + model.getFirstName());
         int lengthFirstName = model.getFirstName().length();
         Matcher firstNameLatLetter = patlatletter.matcher(model.getFirstName());
+        log.debug("фамилия " + model.getLastName());
         int lengthLastName = model.getLastName().length();
         Matcher lastNameLatLetter = patlatletter.matcher(model.getLastName());
         int lengthMiddleName;
         Matcher middleNameLatLetter;
-        //boolean firstLastMiddleNameAnswer;
+        log.debug("отчество " + model.getMiddleName());
         if (model.getMiddleName() != null) {
             lengthMiddleName = model.getMiddleName().length();
             middleNameLatLetter = patlatletter.matcher(model.getMiddleName());
             if ((lengthFirstName >= 2) && (lengthFirstName <= 30)
                     && (lengthLastName >= 2) && (lengthLastName <= 30)
                     && (lengthMiddleName >= 2) && (lengthMiddleName <= 30)
-                    && (firstNameLatLetter.matches() == true)
-                    && (lastNameLatLetter.matches() == true)
+                    && (firstNameLatLetter.matches())
+                    && (lastNameLatLetter.matches())
                     && (middleNameLatLetter.matches())
             ) {
                 firstLastMiddleNameAnswer = true;
@@ -55,69 +57,127 @@ public class OffersService {
 
             if ((lengthFirstName >= 2) && (lengthFirstName <= 30)
                     && (lengthLastName >= 2) && (lengthLastName <= 30)
-                    && (firstNameLatLetter.matches() == true)
-                    && (lastNameLatLetter.matches() == true)
+                    && (firstNameLatLetter.matches())
+                    && (lastNameLatLetter.matches())
             ) {
                 firstLastMiddleNameAnswer = true;
-            } else firstLastMiddleNameAnswer = false;
+            } else {log.info("проверьте ФИО");
+                throw new IllegalArgumentException("проверьте ФИО");
+            }
+
         }
         return firstLastMiddleNameAnswer;
     }
 
-    public boolean AmountOffers(LoanApplicationRequestDTO model) {
-        //boolean amountAnswer;
+    public boolean amountOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод amountOffers");
+        boolean amountAnswer;
+        log.debug("запрошенная сумма "+model.getAmount());
         int compare = model.getAmount().compareTo(amountMin);
         if (compare >= 0) {
             amountAnswer = true;
-        } else amountAnswer = false;
+        } else {log.info("увеличите сумму кредита");
+            throw new IllegalArgumentException("увеличите сумму кредита");}
         return amountAnswer;
     }
 
-    public boolean TermOffers(LoanApplicationRequestDTO model) {
-        //boolean termAnswer;
+    public boolean termOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод termOffers");
+        boolean termAnswer;
+        log.debug("срок кредита "+model.getTerm());
         if (model.getTerm() >= 6) {
             termAnswer = true;
-        } else termAnswer = false;
+        } else {log.info("увеличите срок кредита");
+            throw new IllegalArgumentException("увеличите срок кредита");
+        }
         return termAnswer;
     }
 
-    public boolean BirthdateOffers(LoanApplicationRequestDTO model) {
-        // boolean birthdateAnswer;
+    public boolean birthdateOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод birthdateOffers");
+        boolean birthdateAnswer;
         LocalDate date = LocalDate.now();
+        log.debug("дата рождения "+model.getBirthdate());
         int age = date.compareTo(model.getBirthdate());
         if (age >= 18) {
             birthdateAnswer = true;
-        } else birthdateAnswer = false;
+        } else {log.info("проверьте дату рождения");
+            throw new IllegalArgumentException("проверьте дату рождения");
+        }
         return birthdateAnswer;
     }
 
-    public boolean PassportOffers(LoanApplicationRequestDTO model) {
-        // boolean passportAnswer;
+    public boolean passportOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод passportOffers");
+        boolean passportAnswer;
+        log.debug("серия номер "+model.getPassportSeries()+", "+ model.getPassportNumber());
         int lengthPassportSeries = model.getPassportSeries().length();
         int lengthPassportNumber = model.getPassportNumber().length();
         if ((lengthPassportSeries == 4) && (lengthPassportNumber == 6)) {
             passportAnswer = true;
-        } else passportAnswer = false;
+        } else {log.info("проверьте данные паспорта");
+            throw new IllegalArgumentException("проверьте данные паспорта");
+        }
         return passportAnswer;
     }
 
-    public boolean EmailOffers(LoanApplicationRequestDTO model) {
-        // boolean emailAnswer;
+    public boolean emailOffers(LoanApplicationRequestDTO model) {
+        log.info("вход в метод emailOffers");
+        boolean emailAnswer;
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern patEmail = Pattern.compile(regex);
+        log.debug("email "+model.getEmail());
         Matcher emailOffers = patEmail.matcher(model.getEmail());
         if (emailOffers.matches() == true) {
             emailAnswer = true;
-        } else throw new IllegalArgumentException("неверный emal");
+        } else {log.info("неверный email");
+            throw new IllegalArgumentException("неверный email");
+        }
         return emailAnswer;
     }
 
+    private LoanOfferDTO possibleTermsOfTheLoan(Boolean isInsuranceEnabled, Boolean isSalaryClient, LoanApplicationRequestDTO model) {
+        Long applicationId = Long.valueOf(1);//id в бд
+        BigDecimal requestedAmount = model.getAmount();//сумма кредита
+        Integer term = model.getTerm();//срок кредита
+        BigDecimal rate;
+        BigDecimal monthlyPayment;
+        BigDecimal totalAmount;
+        BigDecimal monthsOfTheYear = BigDecimal.valueOf(12);
+        BigDecimal percent = BigDecimal.valueOf(100);
+        if (!isInsuranceEnabled && !isSalaryClient) {
+            rate = BigDecimal.valueOf(initialRate + enabled + salaryClient);// ставка
+        } else if ((!isInsuranceEnabled) && (isSalaryClient)) {
+            rate = BigDecimal.valueOf(initialRate + enabled - salaryClient);
+        } else if ((isInsuranceEnabled) && (!isSalaryClient)) {
+            rate = BigDecimal.valueOf(initialRate - enabled + salaryClient);
+        } else {
+            rate = BigDecimal.valueOf(initialRate - enabled - salaryClient);
+        }
+        BigDecimal monthRate = rate.divide(monthsOfTheYear.multiply(percent), 5, RoundingMode.HALF_UP);// месячный %
+        BigDecimal exponentiation = (BigDecimal.ONE.add(monthRate));//(1+monthRate)
+        BigDecimal degree = exponentiation.pow(term);
+        BigDecimal numerator = requestedAmount.multiply(monthRate.multiply(degree));
+        BigDecimal denominator = degree.subtract(BigDecimal.ONE);
+        monthlyPayment = numerator.divide(denominator, 2, RoundingMode.HALF_UP); //ежемесячный платеж
+        totalAmount = BigDecimal.valueOf(term).multiply(monthlyPayment);//итоговый платеж
+        return new LoanOfferDTO(applicationId, requestedAmount, totalAmount, term, monthlyPayment, rate, isInsuranceEnabled, isSalaryClient);
+    }
 
-    public List<LoanOfferDTO> LoanOptions() {
-        int percent = initialRate;// начальный % по кредиту
-            List<LoanOfferDTO> LoanOfferDTO = new ArrayList<>();
-            LoanOfferDTO.add(new LoanOfferDTO());
-        return LoanOfferDTO;
+    public List<LoanOfferDTO> loanOptions(LoanApplicationRequestDTO model) {
+        log.info("вход в метод loanOptions");
+        List<LoanOfferDTO> loanOfferDTO;
+        if (firstLastMiddleNameOffers(model) && amountOffers(model) && termOffers(model) && birthdateOffers(model) &&
+                passportOffers(model) && emailOffers(model)) {
+            loanOfferDTO = new ArrayList<>();
+            loanOfferDTO.add(possibleTermsOfTheLoan(false, false, model));
+            loanOfferDTO.add(possibleTermsOfTheLoan(false, true, model));
+            loanOfferDTO.add(possibleTermsOfTheLoan(true, false, model));
+            loanOfferDTO.add(possibleTermsOfTheLoan(true, true, model));
+        } else {log.info("проверьте введеные данные");
+            throw new IllegalArgumentException("проверьте данные паспорта");
+        }
+        return loanOfferDTO;
     }
 
 }
