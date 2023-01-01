@@ -1,7 +1,5 @@
 package ru.podgoretskaya.loan_conveyor.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import ru.podgoretskaya.loan_conveyor.dto.CreditDTO;
 import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
 import ru.podgoretskaya.loan_conveyor.dto.LoanOfferDTO;
@@ -20,10 +17,8 @@ import ru.podgoretskaya.loan_conveyor.service.OffersService;
 import java.util.List;
 
 @Controller
-@RestController
 @Slf4j
 @SuppressWarnings("unused")
-@Tag(name = "Реализация кредитного конвейера", description = "Методы для реализации прескоринга и скоринга")
 public class APIController {
     LoanApplicationRequestDTO operationOffersModel = new LoanApplicationRequestDTO();
     ScoringDataDTO operationCalculationModel = new ScoringDataDTO();
@@ -37,26 +32,24 @@ public class APIController {
     }
 
     @PostMapping(value = "/conveyor/offers")
-    @Operation(summary = "прескоринг")
     public ResponseEntity<List<LoanOfferDTO>> getOffersPages(@RequestBody LoanApplicationRequestDTO model) {
-        log.info("вызов /conveyor/offers");
+        log.info("вызов /conveyor/offers. Параметры: \"" + model.toString());
         try {
             return new ResponseEntity<>(offersService.loanOptions(model), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             log.info("ошибка заполнения формы");
-            return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping(value = "/conveyor/calculation")
-    @Operation(summary = "скоринг")
     public ResponseEntity<CreditDTO> getOffersPages(@RequestBody ScoringDataDTO model) {
-        log.info("вызов /conveyor/calculation");
+        log.info("вызов /conveyor/calculation. Параметры: \"" + model.toString());
         try {
             return new ResponseEntity(calculationService.creditDTO(model), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             log.info("ошибка заполнения формы");
-            return new ResponseEntity(HttpStatus.BAD_GATEWAY);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
     }
 }
