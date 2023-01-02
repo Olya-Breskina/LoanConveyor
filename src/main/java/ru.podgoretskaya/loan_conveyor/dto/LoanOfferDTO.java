@@ -12,12 +12,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @ToString
 public class LoanOfferDTO {
-    private Long applicationId;
-    private BigDecimal requestedAmount;
-    private BigDecimal totalAmount;
-    private Integer term;
-    private BigDecimal monthlyPayment;
-    private BigDecimal rate;
-    private Boolean isInsuranceEnabled;
-    private Boolean isSalaryClient;
+    private Long applicationId;//id в бд
+    private BigDecimal requestedAmount;//сумма кредита
+    private BigDecimal totalAmount;//итоговый платеж
+    private Integer term;//срок кредита
+    private BigDecimal monthlyPayment;//ежемесячный платеж
+    private BigDecimal rate;// ставка
+    private Boolean isInsuranceEnabled;// страховка
+    private Boolean isSalaryClient;//зп клиент
+
 }
