@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 @Getter
 @Setter
 @Schema(description = "Данные для прескоринга")
