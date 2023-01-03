@@ -26,6 +26,7 @@ public class OffersService {
     @Value("${amountMin}")
     private BigDecimal amountMin;
 
+
     public void firstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
         log.info("проверка ФИО");
         Pattern patlatletter = Pattern.compile("^[a-zA-Z]+$");
@@ -55,6 +56,7 @@ public class OffersService {
                     && (firstNameLatLetter.matches())
                     && (lastNameLatLetter.matches())
             ) {
+
             } else {
                 log.info("проверьте ФИО");
                 throw new IllegalArgumentException("проверьте ФИО");
@@ -118,6 +120,7 @@ public class OffersService {
             log.info("неверный email");
             throw new IllegalArgumentException("неверный email");
         }
+
     }
 
     private LoanOfferDTO possibleTermsOfTheLoan(Boolean isInsuranceEnabled, Boolean isSalaryClient, LoanApplicationRequestDTO model) {

@@ -82,6 +82,7 @@ public class CalculationService {
             case DIVORCED:
                 rate = rate.add(BigDecimal.valueOf(1));
                 break;
+
             case SINGLE, WIDOW_WIDOWER:
                 break;
             default:
