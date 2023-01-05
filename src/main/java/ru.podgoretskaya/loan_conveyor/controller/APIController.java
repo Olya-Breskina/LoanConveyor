@@ -1,5 +1,8 @@
 package ru.podgoretskaya.loan_conveyor.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import java.util.List;
 @Controller
 @Slf4j
 @SuppressWarnings("unused")
+@Tag(name="Реализация кредитного конвейера", description = "Методы для реализации прескоринга и скоринга")
 public class APIController {
     LoanApplicationRequestDTO operationOffersModel = new LoanApplicationRequestDTO();
     ScoringDataDTO operationCalculationModel = new ScoringDataDTO();
@@ -32,7 +36,8 @@ public class APIController {
     }
 
     @PostMapping(value = "/conveyor/offers")
-    public ResponseEntity<List<LoanOfferDTO>> getOffersPages(@RequestBody LoanApplicationRequestDTO model) {
+    @Operation(summary = "прескоринг")
+    public ResponseEntity<List<LoanOfferDTO>> getOffersPages(@Parameter @RequestBody LoanApplicationRequestDTO model) {
         log.info("вызов /conveyor/offers. Параметры: \"" + model.toString());
         try {
             return new ResponseEntity<>(offersService.loanOptions(model), HttpStatus.OK);
@@ -43,7 +48,8 @@ public class APIController {
     }
 
     @PostMapping(value = "/conveyor/calculation")
-    public ResponseEntity<CreditDTO> getOffersPages(@RequestBody ScoringDataDTO model) {
+    @Operation(summary = "скоринг")
+    public ResponseEntity<CreditDTO> getOffersPages( @Parameter @RequestBody ScoringDataDTO model) {
         log.info("вызов /conveyor/calculation. Параметры: \"" + model.toString());
         try {
             return new ResponseEntity(calculationService.creditDTO(model), HttpStatus.OK);

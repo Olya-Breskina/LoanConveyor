@@ -1,8 +1,10 @@
 package ru.podgoretskaya.loan_conveyor.dto;
 
-//import io.swagger.v3.oas.annotations.media.Schema;
-//import jakarta.validation.constraints.NotBlank;
-//import jakarta.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -12,42 +14,38 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-//@Schema(description = "Данные для прескоринга")
+@Schema(description = "данные для прескоринга")
 public class LoanApplicationRequestDTO {
-   // @Schema(description = "Сумма кредита")
-    @NonNull
+   @Schema(description = "сумма кредита")
+   @NonNull
     private BigDecimal amount;
-
-    //@Schema(description = "Срок кредита")
+    @Schema(description = "срок кредита")
     @NonNull
+    @Size
+ @Min(6)
     private Integer term;
-
-    //@Schema(description = "Имя")
-   // @NotBlank
-   // @Size(min=2, max = 30)
+    @Schema(description = "имя")
+    @NotBlank
+    @Size(min = 2, max = 30)
     private String firstName;
-
-   // @Schema(description = "Фамилия")
-    @NonNull
-  //  @Size(min=2, max = 30)
+    @Schema(description = "фамилия")
+    @NotBlank
+    @Size(min = 2, max = 30)
     private String lastName;
-
-   // @Schema(description = "Отчество")
+    @Schema(description = "отчество, если есть")
     private String middleName;
-
-   // @Schema(description = "Сумма кредита")
-   // @NotBlank
+    @Schema(description = "электронный адрес")
+    @NotBlank
     private String email;
-
-   // @Schema(description = "Email адрес")
-    @NonNull
+    @Schema(description = "дата рождения")
+    @NotBlank
     private LocalDate birthdate;
-
-  //  @Schema(description = "Серия паспорта")
-  //  @NotBlank
+    @Schema(description = "серия паспорта")
+    @NotBlank
+    @Size(min = 4, max = 4)
     private String passportSeries;
-
-   // @Schema(description = "Номер паспорта")
-   // @NotBlank
+    @Schema(description = "номер паспорта")
+    @NotBlank
+    @Size(min = 6, max = 6)
     private String passportNumber;
 }
