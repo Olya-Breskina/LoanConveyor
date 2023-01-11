@@ -3,6 +3,8 @@ initialRate: 20
 enabled: 3
 salaryClient: 1
 amountMin: 100000
+termMin: 6
+ageMin: 18
 
 logging:
   level:

@@ -24,13 +24,10 @@ public class CalculationService {
     private BigDecimal amountMin;
     @Value("${creditInsurance}")
     private BigDecimal creditInsurance;
-    BigDecimal monthlyPayment;//ежемесячный платеж
-    BigDecimal psk;// полной стоимости кредита
-    BigDecimal monthsOfTheYear = BigDecimal.valueOf(12);
-    BigDecimal percent = BigDecimal.valueOf(100);
+    private final BigDecimal monthsOfTheYear = BigDecimal.valueOf(12);
+    private final BigDecimal percent = BigDecimal.valueOf(100);
 
     public BigDecimal rate(ScoringDataDTO model) {
-        log.info("вход в метод rate ");
         BigDecimal rate = initiRate;
         /*Рабочий статус: Безработный → отказ;
         Самозанятый → ставка увеличивается на 1;
@@ -82,9 +79,7 @@ public class CalculationService {
             case DIVORCED:
                 rate = rate.add(BigDecimal.valueOf(1));
                 break;
-            case SINGLE:
-                break;
-            case WIDOW_WIDOWER:
+            case SINGLE, WIDOW_WIDOWER:
                 break;
             default:
                 throw new IllegalArgumentException("укажите семейный статус");
@@ -139,7 +134,6 @@ public class CalculationService {
     }
 
     public BigDecimal monthlyPaymentAmount(ScoringDataDTO model, BigDecimal rate) {
-        log.info("вход в метод monthlyPaymentAmount");
         BigDecimal requestedAmount = model.getAmount();//сумма кредита
         Integer term = model.getTerm();//срок кредита
         BigDecimal monthRate = rate.divide(monthsOfTheYear.multiply(percent), 2, RoundingMode.HALF_UP);// месячный %
@@ -147,13 +141,12 @@ public class CalculationService {
         BigDecimal degree = exponentiation.pow(term);
         BigDecimal numerator = requestedAmount.multiply(monthRate.multiply(degree));
         BigDecimal denominator = degree.subtract(BigDecimal.ONE);
-        monthlyPayment = numerator.divide(denominator, 2, RoundingMode.HALF_UP); //ежемесячный платеж
+        BigDecimal monthlyPayment = numerator.divide(denominator, 2, RoundingMode.HALF_UP); //ежемесячный платеж
         log.info("размер ежемесячного платежа " + monthlyPayment);
         return monthlyPayment;
     }
 
-    public BigDecimal psk(ScoringDataDTO model) {
-        log.info("вход в метод psk");
+    public BigDecimal psk(ScoringDataDTO model, BigDecimal monthlyPayment) {
         BigDecimal requestedAmount = model.getAmount();
         Integer term = model.getTerm();
         boolean isInsuranceEnabled = model.getIsInsuranceEnabled();
@@ -166,13 +159,12 @@ public class CalculationService {
         BigDecimal numerator = totalAmountOfAllPayments.divide(requestedAmount, 2, RoundingMode.HALF_UP)
                 .subtract(BigDecimal.valueOf(1));
         BigDecimal termInYears = BigDecimal.valueOf(term).divide(BigDecimal.valueOf(12));//срок кредита в годах
-        psk = numerator.divide(termInYears).multiply(BigDecimal.valueOf(100));
+        BigDecimal psk = numerator.divide(termInYears).multiply(BigDecimal.valueOf(100));
         log.info("пск " + psk);
         return psk;
     }
 
-    public List<PaymentScheduleElement> paymentScheduleElement(ScoringDataDTO model, BigDecimal rate) {
-        log.info("вход в метод paymentScheduleElement");
+    public List<PaymentScheduleElement> paymentScheduleElement(ScoringDataDTO model, BigDecimal rate, BigDecimal monthlyPayment) {
         List<PaymentScheduleElement> paymentScheduleElement = new ArrayList<>();
         Integer number = 1;
         LocalDate date = LocalDate.now();//дата
@@ -195,10 +187,10 @@ public class CalculationService {
         Integer term = model.getTerm();
         BigDecimal rate = rate(model);
         BigDecimal monthlyPayment = monthlyPaymentAmount(model, rate);
-        BigDecimal psk = psk(model);
+        BigDecimal psk = psk(model, monthlyPayment);
         Boolean isInsuranceEnabled = model.getIsInsuranceEnabled();
         Boolean isSalaryClient = model.getIsSalaryClient();
-        List<PaymentScheduleElement> paymentSchedule = paymentScheduleElement(model, rate);
-        return new CreditDTO(amount,term,rate,monthlyPayment,psk,isInsuranceEnabled,isSalaryClient,paymentSchedule);
+        List<PaymentScheduleElement> paymentSchedule = paymentScheduleElement(model, rate, monthlyPayment);
+        return new CreditDTO(amount, term, rate, monthlyPayment, psk, isInsuranceEnabled, isSalaryClient, paymentSchedule);
     }
 }
