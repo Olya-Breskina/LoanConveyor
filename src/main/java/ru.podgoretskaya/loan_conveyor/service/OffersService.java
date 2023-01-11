@@ -25,99 +25,84 @@ public class OffersService {
     private int salaryClient;
     @Value("${amountMin}")
     private BigDecimal amountMin;
+    @Value("${termMin}")
+    private int termMin;
+    @Value("${ageMin}")
+    private int ageMin;
 
 
-    public void firstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
-        log.info("проверка ФИО");
-        Pattern patlatletter = Pattern.compile("^[a-zA-Z]+$");
+   private void firstLastMiddleNameOffers(LoanApplicationRequestDTO model) {
+       Pattern patlatletter = Pattern.compile("^[a-zA-Z]{2,30}$");
         log.debug("имя " + model.getFirstName());
-        int lengthFirstName = model.getFirstName().length();
         Matcher firstNameLatLetter = patlatletter.matcher(model.getFirstName());
+        if (!firstNameLatLetter.matches()) {
+            log.info("проверьте имя" + model.getFirstName());
+            throw new IllegalArgumentException("проверьте ФИО");
+        }
         log.debug("фамилия " + model.getLastName());
-        int lengthLastName = model.getLastName().length();
         Matcher lastNameLatLetter = patlatletter.matcher(model.getLastName());
-        int lengthMiddleName;
-        Matcher middleNameLatLetter;
-        log.debug("отчество " + model.getMiddleName());
+        if (!lastNameLatLetter.matches()) {
+            log.info("проверьте фамилия" + model.getFirstName());
+            throw new IllegalArgumentException("проверьте ФИО");
+        }
         if (model.getMiddleName() != null) {
-            lengthMiddleName = model.getMiddleName().length();
-            middleNameLatLetter = patlatletter.matcher(model.getMiddleName());
-            if ((lengthFirstName >= 2) && (lengthFirstName <= 30)
-                    && (lengthLastName >= 2) && (lengthLastName <= 30)
-                    && (lengthMiddleName >= 2) && (lengthMiddleName <= 30)
-                    && (firstNameLatLetter.matches())
-                    && (lastNameLatLetter.matches())
-                    && (middleNameLatLetter.matches())
-            ) {
-            }
-        } else {
-            if ((lengthFirstName >= 2) && (lengthFirstName <= 30)
-                    && (lengthLastName >= 2) && (lengthLastName <= 30)
-                    && (firstNameLatLetter.matches())
-                    && (lastNameLatLetter.matches())
-            ) {
-
-            } else {
-                log.info("проверьте ФИО");
+            log.debug("отчество " + model.getMiddleName());
+            Matcher middleNameLatLetter = patlatletter.matcher(model.getMiddleName());
+            if (!middleNameLatLetter.matches()) {
+                log.info("проверьте отчество" + model.getMiddleName());
                 throw new IllegalArgumentException("проверьте ФИО");
             }
         }
     }
 
     public void amountOffers(LoanApplicationRequestDTO model) {
-        log.info("вход в метод amountOffers");
         log.debug("запрошенная сумма " + model.getAmount());
         int compare = model.getAmount().compareTo(amountMin);
-        if (compare >= 0) {
-        } else {
-            log.info("увеличите сумму кредита");
+        if (compare <0) {
+            log.info("увеличите сумму кредита"+ model.getAmount());
             throw new IllegalArgumentException("увеличите сумму кредита");
         }
     }
 
-    public void termOffers(LoanApplicationRequestDTO model) {
-        log.info("вход в метод termOffers");
+    private void termOffers(LoanApplicationRequestDTO model) {
         log.debug("срок кредита " + model.getTerm());
-        if (model.getTerm() >= 6) {
-        } else {
-            log.info("увеличите срок кредита");
+        int compare = model.getTerm().compareTo(termMin);
+        if ((compare <0)) {
+            log.info("увеличите срок кредита"+ model.getTerm());
             throw new IllegalArgumentException("увеличите срок кредита");
         }
     }
 
-    public void birthdateOffers(LoanApplicationRequestDTO model) {
-        log.info("вход в метод birthdateOffers");
+    private void birthdateOffers(LoanApplicationRequestDTO model) {
         LocalDate date = LocalDate.now();
         log.debug("дата рождения " + model.getBirthdate());
         int age = date.compareTo(model.getBirthdate());
-        if (age >= 18) {
+        if (age >= ageMin) {
         } else {
-            log.info("проверьте дату рождения");
+            log.info("проверьте дату рождения"+ model.getBirthdate());
             throw new IllegalArgumentException("проверьте дату рождения");
         }
     }
 
-    public void passportOffers(LoanApplicationRequestDTO model) {
-        log.info("вход в метод passportOffers");
+    private void passportOffers(LoanApplicationRequestDTO model) {
         log.debug("серия номер " + model.getPassportSeries() + ", " + model.getPassportNumber());
         int lengthPassportSeries = model.getPassportSeries().length();
         int lengthPassportNumber = model.getPassportNumber().length();
         if ((lengthPassportSeries == 4) && (lengthPassportNumber == 6)) {
         } else {
-            log.info("проверьте данные паспорта");
+            log.info("проверьте данные паспорта"+ model.getPassportSeries() + ", " + model.getPassportNumber());
             throw new IllegalArgumentException("проверьте данные паспорта");
         }
     }
 
-    public void emailOffers(LoanApplicationRequestDTO model) {
-        log.info("вход в метод emailOffers");
+    private void emailOffers(LoanApplicationRequestDTO model) {
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern patEmail = Pattern.compile(regex);
         log.debug("email " + model.getEmail());
         Matcher emailOffers = patEmail.matcher(model.getEmail());
         if (emailOffers.matches() == true) {
         } else {
-            log.info("неверный email");
+            log.info("неверный email"+ model.getEmail());
             throw new IllegalArgumentException("неверный email");
         }
 
@@ -152,7 +137,6 @@ public class OffersService {
     }
 
     public List<LoanOfferDTO> loanOptions(LoanApplicationRequestDTO model) {
-        log.info("вход в метод loanOptions");
         List<LoanOfferDTO> loanOfferDTO;
         firstLastMiddleNameOffers(model);
         amountOffers(model);
