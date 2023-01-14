@@ -1,5 +1,7 @@
 package ru.podgoretskaya.loan_conveyor.service;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 public class OffersService {
     @Value("${initialRate}")
     private int initialRate;
@@ -58,8 +62,8 @@ public class OffersService {
     public void amountOffers(LoanApplicationRequestDTO model) {
         log.debug("запрошенная сумма " + model.getAmount());
         int compare = model.getAmount().compareTo(amountMin);
-        if (compare <0) {
-            log.info("увеличите сумму кредита"+ model.getAmount());
+        if (compare < 0) {
+            log.info("увеличите сумму кредита" + model.getAmount());
             throw new IllegalArgumentException("увеличите сумму кредита");
         }
     }
@@ -67,8 +71,8 @@ public class OffersService {
     private void termOffers(LoanApplicationRequestDTO model) {
         log.debug("срок кредита " + model.getTerm());
         int compare = model.getTerm().compareTo(termMin);
-        if ((compare <0)) {
-            log.info("увеличите срок кредита"+ model.getTerm());
+        if ((compare < 0)) {
+            log.info("увеличите срок кредита" + model.getTerm());
             throw new IllegalArgumentException("увеличите срок кредита");
         }
     }
@@ -79,7 +83,7 @@ public class OffersService {
         int age = date.compareTo(model.getBirthdate());
         if (age >= ageMin) {
         } else {
-            log.info("проверьте дату рождения"+ model.getBirthdate());
+            log.info("проверьте дату рождения" + model.getBirthdate());
             throw new IllegalArgumentException("проверьте дату рождения");
         }
     }
@@ -90,7 +94,7 @@ public class OffersService {
         int lengthPassportNumber = model.getPassportNumber().length();
         if ((lengthPassportSeries == 4) && (lengthPassportNumber == 6)) {
         } else {
-            log.info("проверьте данные паспорта"+ model.getPassportSeries() + ", " + model.getPassportNumber());
+            log.info("проверьте данные паспорта" + model.getPassportSeries() + ", " + model.getPassportNumber());
             throw new IllegalArgumentException("проверьте данные паспорта");
         }
     }
@@ -100,9 +104,9 @@ public class OffersService {
         Pattern patEmail = Pattern.compile(regex);
         log.debug("email " + model.getEmail());
         Matcher emailOffers = patEmail.matcher(model.getEmail());
-        if (emailOffers.matches() == true) {
+        if (emailOffers.matches()) {
         } else {
-            log.info("неверный email"+ model.getEmail());
+            log.info("неверный email" + model.getEmail());
             throw new IllegalArgumentException("неверный email");
         }
 
