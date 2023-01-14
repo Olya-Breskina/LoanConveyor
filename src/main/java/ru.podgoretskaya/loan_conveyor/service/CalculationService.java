@@ -195,6 +195,6 @@ public class CalculationService {
         Boolean isInsuranceEnabled = model.getIsInsuranceEnabled();
         Boolean isSalaryClient = model.getIsSalaryClient();
         List<PaymentScheduleElement> paymentSchedule = paymentScheduleElement(model, rate, monthlyPayment);
-        return new CreditDTO(amount, term, rate, monthlyPayment, psk, isInsuranceEnabled, isSalaryClient, paymentSchedule);
+        return new CreditDTO(amount, term,  monthlyPayment,rate, psk, isInsuranceEnabled, isSalaryClient, paymentSchedule);
     }
 }
