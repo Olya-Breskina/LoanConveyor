@@ -1,16 +1,14 @@
 package ru.podgoretskaya.loan_conveyor.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 @Getter
 @Setter
 @AllArgsConstructor
 @ToString
+@NoArgsConstructor
 @Schema(description = "данные о работе")
 public class EmploymentDTO {
     @Schema(description = "статус занятости")
