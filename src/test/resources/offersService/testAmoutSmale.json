@@ -1,0 +1,11 @@
+{
+  "firstName":"qwe",
+  "middleName":"qwe",
+  "lastName":"qwe",
+  "birthdate":"1994-12-13",
+  "passportSeries":"1234",
+  "passportNumber":"123456",
+  "email":"a@mail.ru",
+  "amount":99999,
+  "term":12
+}
