@@ -1,17 +1,14 @@
 package ru.podgoretskaya.loan_conveyor.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.podgoretskaya.loan_conveyor.dto.LoanApplicationRequestDTO;
 import ru.podgoretskaya.loan_conveyor.service.CalculationService;
 import ru.podgoretskaya.loan_conveyor.service.OffersService;
 
-import java.io.File;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(APIController.class)
 public class APIControllerTest {
-    ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     MockMvc mockMvc;
     @MockBean
