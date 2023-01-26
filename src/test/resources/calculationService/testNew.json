@@ -1,0 +1,26 @@
+{
+  "amount": 100000,
+  "term": 6,
+  "firstName": "qwe",
+  "middleName": "qwe",
+  "lastName": "qwe",
+  "gender": "FEMALE",
+  "birthdate": "1964-01-14",
+  "passportSeries": "1234",
+  "passportNumber": "123456",
+  "passportIssueDate": "2015-01-14",
+  "passportIssueBranch": "qazwsx",
+  "maritalStatus": "DIVORCED",
+  "dependentAmount": "10",
+  "employment": {
+    "employmentStatus": "BUSINESS_OWNER",
+    "employerINN": "123-456-789",
+    "salary": 6000,
+    "position": "MID_MANAGER",
+    "workExperienceTotal": 7,
+    "workExperienceCurrent": 6
+  },
+  "account": "qaz",
+  "isInsuranceEnabled": "true",
+  "isSalaryClient": "true"
+}

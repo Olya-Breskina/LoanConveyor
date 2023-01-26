@@ -1,4 +1,4 @@
-package Podgoretskaya.LoanConveyor;
+package ru.podgoretskaya.loan_conveyor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
